@@ -1,6 +1,10 @@
+const request = require('./utils/request.js');
+
 //app.js
 App({
   onLaunch: function() {
+    // 清除本地缓存
+    wx.clearStorage();
     // 展示本地存储能力
     var logs = wx.getStorageSync('logs') || [];
     logs.unshift(Date.now());
@@ -10,17 +14,14 @@ App({
     wx.login({
       success: res => {
         console.log('wx.login', res);
-        wx.request({
-          url: 'http://5s9284.natappfree.cc/weixin/getOpenIdByCode',
+        request({
+          url: this.globalData.weixinRequestURL + '/weixin/getOpenIdByCode',
           method: "POST",
           data: {
             code: res.code
           },
           success: function(res) {
-            if (res && res.header && res.header['Set-Cookie']) {
-              wx.setStorageSync('cookieKey', res.header['Set-Cookie']);
-            }
-            console.log(res.data);
+            console.log("getOpenIdByCode", res.data);
           }
         });
       }
@@ -48,6 +49,7 @@ App({
     })
   },
   globalData: {
-    userInfo: null
+    userInfo: null,
+    weixinRequestURL: 'http://zku3kr.natappfree.cc'
   }
 })

@@ -1,3 +1,4 @@
+const request = require('../../utils/request.js');
 //index.js
 //获取应用实例
 const app = getApp()
@@ -59,8 +60,8 @@ Page({
     if (cookie) {
       header.Cookie = cookie;
     }
-    wx.request({
-      url: 'http://5s9284.natappfree.cc/weixin/test',
+    request({
+      url: app.globalData.weixinRequestURL + '/weixin/test',
       header: header,
       success: function(res) {
         console.log(res.data);
