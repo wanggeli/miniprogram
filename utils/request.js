@@ -1,15 +1,10 @@
 const request = function(obj) {
-  let key = 'cookie'
-  let cookie = wx.getStorageSync(key);
-  console.log("wx.getStorageSync('cookie')", cookie);
-  cookie = cookie.name + '=' + cookie.value
-
   if (obj.header) {
-    obj.header.Cookie = cookie;
+    obj.header.Cookie = getCookie();
   } else {
     obj.header = {
       "Content-Type": "application/x-www-form-urlencoded",
-      "Cookie": cookie
+      "Cookie": getCookie()
     }
   }
 
@@ -28,11 +23,11 @@ const request = function(obj) {
     dataType: obj.dataType ? obj.dataType : 'json',
     responseType: obj.responseType ? obj.responseType : 'text',
     success: res => {
-      saveCookie(res.header);
+      setCookie(res.header);
       obj.success(res);
     },
     fail: err => {
-      saveCookie(res.header);
+      setCookie(res.header);
       obj.fail(err);
     },
     complete: res => {
@@ -41,31 +36,20 @@ const request = function(obj) {
   });
 }
 
-function saveCookie(header) {
-  if (!header) return;
-  var cookies = null;
-  if ('Set-Cookie' in header) {
-    cookies = header['Set-Cookie'];
-  } else if ('set-cookie' in header) {
-    cookies = res.header['set-cookie'];
+function getCookie() {
+  var cookie = null;
+  try {
+    cookie = wx.getStorageSync('cookie');
+  } catch (e) {}
+  console.log('getCookie()', cookie);
+  return cookie;
+}
+
+function setCookie(header) {
+  if (header && 'Set-Cookie' in header) {
+    let cookie = header['Set-Cookie'];
+    wx.setStorageSync('cookie', cookie.split(";").shift());
   }
-  //console.log(cookies);
-  if (!cookies) return;
-  if (!Array.isArray(cookies)) {
-    cookies = [cookies];
-  }
-  cookies.forEach(function(item) {
-    var parts = item.split(";");
-    //console.log(parts);
-    var nameValue = parts.shift().split("=");
-    var name = nameValue.shift();
-    var value = nameValue.join("=");
-    var cookie = {
-      name: name,
-      value: value
-    }
-    wx.setStorageSync('cookie', cookie);
-  });
 }
 
 module.exports = request;
